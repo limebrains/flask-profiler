@@ -127,11 +127,14 @@ def wrapHttpEndpoint(f):
             "url": request.base_url,
             "args": dict(request.args.items()),
             "form": dict(request.form.items()),
-            "body": request.data.decode("utf-8", "strict"),
             "headers": dict(request.headers.items()),
             "func": request.endpoint,
             "ip": request.remote_addr
         }
+        try:
+            context['body'] = request.data.decode("utf-8", "strict")
+        except UnicodeDecodeError:
+            context['body'] = 'Unknown'
         endpoint_name = str(request.url_rule)
         wrapped = measure(f, endpoint_name, request.method, context)
         return wrapped(*args, **kwargs)
